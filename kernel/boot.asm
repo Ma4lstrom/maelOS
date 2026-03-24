@@ -35,17 +35,27 @@ _start:
     call check_a20
     cmp ax, 1
 
+    je a20_on
+
+    call a20_enable
+
+a20_on:
     mov ax, 0xB800      ;setting vram segment base address in ax to write to later
     mov es, ax          ;set extra segment to vram segment address
     mov bl, 0x0A        ;set bl to black bg, green text fallout style to pass to print_string
-    jne a20_off_print
     mov si, boot_string
     call print_string
-
     jmp exit
+    
 
-a20_off_print:
-    mov si, a20_not_ena_print
+a20_enable:
+    mov ax, 0x2401
+    int 0x15
+    jc a20_failed
+    test ah, ah
+    jnz a20_failed
+    ret
+
 
 print_string:
 .next_char:
@@ -110,6 +120,7 @@ check_a20:
     je check_a20_exit
 
     mov ax, 1
+
 check_a20_exit:
     pop si
     pop di
@@ -119,16 +130,43 @@ check_a20_exit:
 
     ret
 
+a20_failed:
+    hlt
+
 boot_string:
-    db "A20 line enabled already.", 0;
+    db "A20 line enabled.", 0;
 
 a20_not_ena_print:
-    db "A20 line is disabled, enable please.", 0;
+    db "A20 line is disabled.", 0;
 
 disk_read_error:
     db "Disk Read Error. Halting.", 0;
 
 BootDrive: db 0
+
+gdt_start:
+gdt_null:
+    dq 0
+gdt_code:
+    dw 0xFFFF
+    dw 0x0000
+    db 0x00
+    db 10011010b
+    db 11001111b
+    db 0x00
+gdt_data:
+    dw 0xFFFF
+    dw 0x0000
+    db 0x00
+    db 10010010b
+    db 11001111b
+    db 0x00
+
+gdt_end:
+
+gdt_descriptor:
+    dw gdt_end - gdt_start - 1
+    dd gdt_start
 
 TIMES 510 - ($ - $$) DB 0       ;pad file upto last 2 bytes
 DW 0xAA55       ;mbr boot signature needed to be recognized by bios
