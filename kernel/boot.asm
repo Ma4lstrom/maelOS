@@ -3,7 +3,7 @@ org 0x7C00             ;assemble code as if it was at 0x7C00
 
 _start:
     cli                 ;disable le interupts for now
-    mov [BootDrive], dl
+    cld                 ;clear direction flag
     xor ax, ax          ;set base register to 0 so i can set others to 0
     mov ds, ax          ;set data segment to 0, all symbol offsets will be using this as a baseoffset i believe.
     xor di, di          ;index of vram buff address (this is top left index 0)
@@ -15,24 +15,21 @@ _start:
     mov ax, 0x9000      ;set ax stack segment base in helper register
     mov ss, ax          ;move stack segment base into stack segment register
     mov sp, 0xFFFF      ;move into stack pointer the offset at which the top of the stack will be
-
-    ;load One sector width of sector 2 on cyl 0 head 0, on first HardDrive.
-    mov dl, [BootDrive]
-    mov ah, 0x02
-    mov al, 0x01
-    mov ch, 0x00
-    mov cl, 0x02
-    mov dh, 0x00
-    mov bx, 0x1000
-
-    mov ax, 0x0000
-    mov es, ax
-
+   
+    mov ah, 0x02        ; BIOS function to read sectors
+    mov al, 1           ; Number of sectors to read
+    mov ch, 0          ; Cylinder number
+    mov cl, 2          ; Sector number (starts at 1)
+    mov dh, 0          ; Head number
+    mov dl, 0x00       ; Drive number (0x00 for first floppy)
+    mov bx, 0x8000     ; Memory address to load the sector
+    
+    lgdt [gdt_descriptor]
     int 0x13    ;call bios int
+    jc disk_error
     
-    jc disk_error       ;if carryflag, jumping to disk error. Means error.
     
-    jmp 0x0000:0x1000
+    jmp 0x0000:0x8000
 
     
 
@@ -64,6 +61,8 @@ disk_read_error:
 
 BootDrive: db 0
 
+;Byte:  0-1        2-3         4        5            6             7
+;     [limit lo] [base lo] [base m] [access]  [flags+limit hi] [base hi]
 gdt_start:
 gdt_null:
     dq 0

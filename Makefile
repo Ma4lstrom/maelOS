@@ -5,9 +5,13 @@ BIN = ./bin/boot.bin
 SRC = ./kernel/boot.asm
 QEMU_PATH = "C:\Program Files\qemu\qemu-system-x86_64.exe"
 # MACOS
-# build: $(BIN)
-# 	dd if=$(BIN) of=$(IMG) bs=512 count=1 conv=notrunc
-# 	qemu-system-x86_64 --drive format=raw,file=$(IMG)
+build_mac:
+	nasm -f bin ./kernel/boot.asm -o ./bin/boot.bin
+	nasm -f bin ./kernel/stage2.asm -o ./bin/stage2.bin
+	dd if=/dev/zero of=./bin/os.img bs=512 count=2880
+	dd if=./bin/boot.bin of=./bin/os.img bs=512 count=1 conv=notrunc
+	dd if=./bin/stage2.bin of=./bin/os.img bs=512 seek=1 conv=notrunc
+	qemu-system-x86_64 -drive file=./bin/os.img,if=floppy,format=raw,index=0
 
 build:
 	nasm -f bin ./kernel/boot.asm -o ./bin/boot.bin
