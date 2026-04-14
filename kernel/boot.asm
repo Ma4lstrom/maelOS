@@ -7,7 +7,7 @@ _start:
     xor ax, ax          ;set base register to 0 so i can set others to 0
     mov ds, ax          ;set data segment to 0, all symbol offsets will be using this as a baseoffset i believe.
     xor di, di          ;index of vram buff address (this is top left index 0)
-
+    mov [0x7E00], dl
     ;this sets up a stack so we can run c code as it wont function without a stack
     ;give the stack segment a segment base of 0x9000, this will be the segment base thats mult by
     ;16 = 0x90000. then set the top of the stack in stack pointer with 0xFFFF
@@ -21,7 +21,7 @@ _start:
     mov ch, 0          ; Cylinder number
     mov cl, 2          ; Sector number (starts at 1)
     mov dh, 0          ; Head number
-    mov dl, 0x00       ; Drive number (0x00 for first floppy)
+    mov dl, [0x7E00]     ; Drive number (0x00 for first floppy)
     mov bx, 0x8000     ; Memory address to load the sector
     
     lgdt [gdt_descriptor]
