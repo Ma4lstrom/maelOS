@@ -25,9 +25,6 @@ print_loop:
     ret
 
 
-print_int:
-    push edi
-    push esi 
 
 clear_screen:
     push edi
