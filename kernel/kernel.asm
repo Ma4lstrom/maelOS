@@ -63,4 +63,4 @@ idt_end:
 
 idt_entry_size equ 8
 
-msg db "Hello from urMom!", 0
+msg db "Hello from kernel", 0

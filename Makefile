@@ -7,6 +7,7 @@ QEMU_PATH = "C:\Program Files\qemu\qemu-system-x86_64.exe"
 OBJS = bin/kernel.o bin/print.o
 LINKER= ./kernel/linker.ld
 KERNEL_BIN= ./bin/kernel.bin
+I386_CC=x86_64-elf-gcc
 
 # MACOS
 build_mac: $(KERNEL_BIN)
@@ -32,11 +33,13 @@ clean:
 $(KERNEL_BIN): $(OBJS) $(LINKER)
 	x86_64-elf-ld -m elf_i386 -T $(LINKER) --oformat binary $(OBJS) -o $(KERNEL_BIN)
 
-bin/kernel.o: kernel/kernel.asm
-	nasm -f elf32 kernel/kernel.asm -o bin/kernel.o
+bin/kernel.o: kernel/kernel.c
+	$(I386_CC) -m32 -c kernel/kernel.c -o bin/kernel.o
+# 	nasm -f elf32 kernel/kernel.asm -o bin/kernel.o
 
-bin/print.o: kernel/print.asm
-	nasm -f elf32 kernel/print.asm -o bin/print.o
+bin/print.o: kernel/print.c
+	$(I386_CC) -m32 -c kernel/print.c -o bin/print.o
+# 	nasm -f elf32 kernel/print.asm -o bin/print.o
 
 run-wind:
 	$(QEMU_PATH) --drive format=raw,file=$(IMG)
