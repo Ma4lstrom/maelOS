@@ -1,12 +1,46 @@
 #include "print.h"
 
+ // apparently inline asm in gcc is at&t syntax, so im documenting this for later
 static inline void outb(unsigned short port, unsigned char val) {
     __asm__ volatile (
         "outb %0, %1"
         : 
         : "a"(val), "Nd"(port)
+    ); 
+}
+
+static inline void outw(unsigned short port, unsigned short val) {
+    __asm__ volatile (
+        "outw %0, %1"
+        :
+        : "a"(val), "Nd"(port)
     );
 }
+
+static inline unsigned char inb(unsigned short port) {
+    unsigned char ret;
+
+    __asm__ volatile (
+        "inb %1, %0"
+        : "=a"(ret)
+        : "Nd"(port)
+    );
+
+    return ret;
+}
+
+static inline unsigned short inw(unsigned short port) {
+    unsigned short ret;
+    
+    __asm__ volatile (
+        "inw %1, %0"
+        : "=a"(ret)
+        : "Nd"(port)
+    );
+
+    return ret;
+}
+ 
 
 void print(char* string) {
     volatile char * vga = (volatile char *)0xB8000;
@@ -15,6 +49,7 @@ void print(char* string) {
         *(volatile unsigned short*)vga = (0x02 << 8) | *string; //write 0x02 green text black background into high bits and character value into low
         vga += 2;
         string++;
+        
     }
 }
 
@@ -27,6 +62,7 @@ void clear_screen() {
         vga += 2;
         i++;
     }
+    set_cursor(0);
 }
 
 void set_cursor(unsigned short pos) {
