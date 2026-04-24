@@ -1,4 +1,13 @@
 #include "print.h"
+#define VGA_WIDTH 80
+#define VGA_HEIGHT 25
+
+struct terminal {
+    short x;
+    short y;
+    short * buffer;
+    short color;
+};
 
  // apparently inline asm in gcc is at&t syntax, so im documenting this for later
 static inline void outb(unsigned short port, unsigned char val) {
@@ -42,6 +51,28 @@ static inline unsigned short inw(unsigned short port) {
 }
  
 
+void putchar(struct terminal* t, char c) {
+    if (c == '\n') {
+        t->x = 0;
+        t->y += 1;
+        set_cursor(t->y * VGA_WIDTH + t->x);
+        return;
+    }
+
+    short position = t->y * VGA_WIDTH + t->x; //position of cursor
+    t->buffer[position] = (t->color << 8) | c;
+
+    t->x++;
+
+    if (t->x >= VGA_WIDTH) {
+        t->x = 0;
+        t->y++;
+    }
+    set_cursor(t->y * VGA_WIDTH + t->x);
+    return;
+
+}
+
 void print(char* string) {
     volatile char * vga = (volatile char *)0xB8000;
     
@@ -49,7 +80,7 @@ void print(char* string) {
         *(volatile unsigned short*)vga = (0x02 << 8) | *string; //write 0x02 green text black background into high bits and character value into low
         vga += 2;
         string++;
-        
+
     }
 }
 
