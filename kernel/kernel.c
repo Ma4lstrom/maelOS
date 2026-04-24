@@ -7,12 +7,16 @@ void kmain(void) {
     t.buffer = (short *)0xB8000;
     t.color = (short)0x0F;
     clear_screen();
-    putchar(&t, 'U');
-    putchar(&t, 'R');
-    putchar(&t, ' ');
-    putchar(&t, 'M');
+    putchar(&t, 'H');
+    putchar(&t, 'E');
+    putchar(&t, 'L');
+    putchar(&t, 'L');
     putchar(&t, 'O');
-    putchar(&t, 'M');
+    putchar(&t, ' ');
+    putchar(&t, 'K');
+    putchar(&t, 'E');
+    putchar(&t, 'R');
+    putchar(&t, 'N');
     while (1) {
         __asm__ volatile("hlt");
     }
