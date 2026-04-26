@@ -1,13 +1,4 @@
 #include "print.h"
-#define VGA_WIDTH 80
-#define VGA_HEIGHT 25
-
-struct terminal {
-    short x;
-    short y;
-    short * buffer;
-    short color;
-};
 
  // apparently inline asm in gcc is at&t syntax, so im documenting this for later
 static inline void outb(unsigned short port, unsigned char val) {
@@ -67,33 +58,62 @@ void putchar(struct terminal* t, char c) {
     if (t->x >= VGA_WIDTH) {
         t->x = 0;
         t->y++;
+        if (t->y == VGA_HEIGHT) {
+            t->x = 0;
+            t->y = 0;
+            t->buffer = (short *)0xB8000;
+        }
     }
     set_cursor(t->y * VGA_WIDTH + t->x);
     return;
 
 }
 
-void print(char* string) {
-    volatile char * vga = (volatile char *)0xB8000;
-    
+short print(struct terminal* t, char* string) {
+    short count = 0;
     while(*string) {
-        *(volatile unsigned short*)vga = (0x02 << 8) | *string; //write 0x02 green text black background into high bits and character value into low
-        vga += 2;
+        putchar(t, *string);
         string++;
-
-    }
+        count++;
+    };
+    return count;
 }
 
+// such a stressful function to figure out... recursion saves the day.
+// pass a number and do some math to disregard needing a len variable passed.
+// adding to + '0' gets the ascii val of the exact number that needs to be printed
+// inherently casting it to a character
+// probably have some unneeded code in this but will update later 
+// FIXME: clean up useless code
+void print_num(struct terminal * t, short num) {
+    char normal_num = num + '0';
 
-void clear_screen() {
-    volatile char * vga = (volatile char *)0xB8000;
+    if (num >= 10) {
+        short new_num = num / 10;
+        if (new_num >= 10) {
+            print_num(t, new_num);
+        } else {
+            char normal_num = new_num + '0';
+            putchar(t,normal_num);
+        }
+        short remainder = num % 10;
+        char remainder_print = remainder + '0';
+        putchar(t, remainder_print);
+    } else {
+        putchar(t, normal_num);
+        return;
+    }
+    return;
+}
+
+//FIXME: currently calling set_cursor 2000 times with this implementation, need to fix.
+void clear_screen(struct terminal * t) {
     int i = 0;
     while(i < 2000) {
-        *(volatile unsigned short*)vga = (0x02 << 8) | ' ';
-        vga += 2;
+        putchar(t, ' ');
         i++;
     }
-    set_cursor(0);
+    return;
 }
 
 void set_cursor(unsigned short pos) {

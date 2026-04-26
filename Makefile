@@ -31,14 +31,14 @@ clean:
 	rm -f ./bin/*
 
 $(KERNEL_BIN): $(OBJS) $(LINKER)
-	x86_64-elf-ld -m elf_i386 -T $(LINKER) --oformat binary $(OBJS) -o $(KERNEL_BIN)
+	x86_64-elf-ld -m elf_i386 -T $(LINKER)  --oformat binary $(OBJS) -o $(KERNEL_BIN)
 
 bin/kernel.o: kernel/kernel.c
-	$(I386_CC) -m32 -c kernel/kernel.c -o bin/kernel.o
+	$(I386_CC) -m32 -c kernel/kernel.c -ffreestanding -fno-builtin -o bin/kernel.o
 # 	nasm -f elf32 kernel/kernel.asm -o bin/kernel.o
 
 bin/print.o: kernel/print.c
-	$(I386_CC) -m32 -c kernel/print.c -o bin/print.o
+	$(I386_CC) -m32 -c kernel/print.c -ffreestanding -fno-builtin -o bin/print.o
 # 	nasm -f elf32 kernel/print.asm -o bin/print.o
 
 run-wind:

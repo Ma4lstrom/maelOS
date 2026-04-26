@@ -14,8 +14,10 @@ void putchar(struct terminal* t, char c);
 
 void set_cursor(unsigned short pos);
 
-void print(char* string);
+short print(struct terminal *t, char* string);
 
-void clear_screen();
+void print_num(struct terminal *t, short num);
+
+void clear_screen(struct terminal *t);
 
 #endif

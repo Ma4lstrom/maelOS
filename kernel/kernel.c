@@ -6,17 +6,12 @@ void kmain(void) {
     t.y = 0;
     t.buffer = (short *)0xB8000;
     t.color = (short)0x0F;
-    clear_screen();
-    putchar(&t, 'H');
-    putchar(&t, 'E');
-    putchar(&t, 'L');
-    putchar(&t, 'L');
-    putchar(&t, 'O');
-    putchar(&t, ' ');
-    putchar(&t, 'K');
-    putchar(&t, 'E');
-    putchar(&t, 'R');
-    putchar(&t, 'N');
+    clear_screen(&t);
+    // short count_written = print(&t, "Hello Kern!\n");
+    // print_num(&t, count_written);
+    for(short i = 0; i < 30; i++) {
+        print(&t, "Hello From MaelOS!\n");
+    }
     while (1) {
         __asm__ volatile("hlt");
     }
