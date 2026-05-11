@@ -51,7 +51,7 @@ idt_end:
 
 ;interrupt_descriptor_entry:
 ;int_offset:
-;   dw 0
+;    dw 0
 ;int_selector:
 ;    dw 08h
 ;int_null:

@@ -41,7 +41,7 @@ static inline unsigned short inw(unsigned short port) {
     return ret;
 }
  
-
+//FIXME: implement scrolling later instead of wrap around
 void putchar(struct terminal* t, char c) {
     if (c == '\n') {
         t->x = 0;
@@ -69,8 +69,8 @@ void putchar(struct terminal* t, char c) {
 
 }
 
-short print(struct terminal* t, char* string) {
-    short count = 0;
+int print(struct terminal* t, char* string) {
+    int count = 0;
     while(*string) {
         putchar(t, *string);
         string++;
@@ -85,18 +85,18 @@ short print(struct terminal* t, char* string) {
 // inherently casting it to a character
 // probably have some unneeded code in this but will update later 
 // FIXME: clean up useless code
-void print_num(struct terminal * t, short num) {
+void print_num(struct terminal * t, int num) {
     char normal_num = num + '0';
 
     if (num >= 10) {
-        short new_num = num / 10;
+        int new_num = num / 10;
         if (new_num >= 10) {
             print_num(t, new_num);
         } else {
             char normal_num = new_num + '0';
             putchar(t,normal_num);
         }
-        short remainder = num % 10;
+        int remainder = num % 10;
         char remainder_print = remainder + '0';
         putchar(t, remainder_print);
     } else {
@@ -106,16 +106,21 @@ void print_num(struct terminal * t, short num) {
     return;
 }
 
-//FIXME: currently calling set_cursor 2000 times with this implementation, need to fix.
 void clear_screen(struct terminal * t) {
     int i = 0;
     while(i < 2000) {
-        putchar(t, ' ');
+        // interesting little gimmick to remember here (learned the hard way), c respects word size with indexing.
+        // 1 index is a whole short (1 whole character which is 2 bytes).
+        t->buffer[i] = (t->color << 8) | ' '; 
         i++;
     }
+    t->x = 0;
+    t->y = 0;
+    set_cursor(0);
     return;
 }
 
+//port 3D4 VGA
 void set_cursor(unsigned short pos) {
     outb(0x3D4, 0x0F);
     outb(0x3D5, (unsigned char)(pos & 0xFF)); //zero out the high bits (like using al in eax)
