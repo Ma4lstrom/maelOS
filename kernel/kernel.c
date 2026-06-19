@@ -25,24 +25,24 @@ void kmain(void) {
     // short count_written = print(&t, "Hello Kern!\n");
     // print_num(&t, count_written);
     print(&t, "Hello From MaelOS!\n");
-    for (short i = 0; i < 5; i++) {
-       print(&t, "offset_low: ");
-       print_num(&t, (uint16_t)idt[i].offset_low);
-       print(&t, "\n");
+    // for (short i = 0; i < 5; i++) {
+    //    print(&t, "offset_low: ");
+    //    print_num(&t, (uint16_t)idt[i].offset_low);
+    //    print(&t, "\n");
 
-       print(&t, "selector: ");
-       print_num(&t, (uint16_t)idt[i].selector);
-       print(&t, "\n");
+    //    print(&t, "selector: ");
+    //    print_num(&t, (uint16_t)idt[i].selector);
+    //    print(&t, "\n");
 
-       print(&t, "attribute: ");
-       print_num(&t, (uint16_t)idt[i].attribute);
-       print(&t, "\n");
+    //    print(&t, "attribute: ");
+    //    print_num(&t, (uint16_t)idt[i].attribute);
+    //    print(&t, "\n");
 
-       print(&t, "offset_high: ");
-       print_num(&t, (uint16_t)idt[i].offset_high);
-       print(&t, "\n");
-       print(&t, "\n");
-    }
+    //    print(&t, "offset_high: ");
+    //    print_num(&t, (uint16_t)idt[i].offset_high);
+    //    print(&t, "\n");
+    //    print(&t, "\n");
+    // }
     
 
 
