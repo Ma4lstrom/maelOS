@@ -9,9 +9,19 @@ struct __attribute__((packed)) idt_entry {
     uint16_t offset_high;
 };
 
+struct __attribute__((packed)) idtr {
+    uint16_t limit; // size limit of idt
+    uint32_t base; //base address of idt 
+};
+
 void fill_idt(struct idt_entry *idt);
 
+struct idt_entry idt[256] = {0};
 
+struct idtr idtr_val = {
+    .limit = (sizeof(struct idt_entry) * 256) - 1,
+    .base = (uint32_t ) idt
+};
 
 void kmain(void) {
     struct terminal t;
@@ -19,9 +29,8 @@ void kmain(void) {
     t.y = 0;
     t.buffer = (short *)0xB8000;
     t.color = (short)0x0F;
-    struct idt_entry idt[256] = {0};
     fill_idt(idt);
-    clear_screen(&t);
+    clear_screen(&t);   
     // short count_written = print(&t, "Hello Kern!\n");
     // print_num(&t, count_written);
     print(&t, "Hello From MaelOS!\n");
@@ -44,17 +53,18 @@ void kmain(void) {
     //    print(&t, "\n");
     // }
     
-
+    
 
     while (1) {
         __asm__ volatile("hlt");
     }
 }
 
-static inline void isr_default() {
+static void isr_default() {
     __asm__ volatile (
-        "cli\n"
-        "hlt\n"
+        "pusha\n"
+        "popa\n"
+        "iret\n"
     ); 
 }
 
@@ -70,7 +80,7 @@ void fill_idt(struct idt_entry *idt) {
      __asm__ volatile (
         "lidt %0"
         :
-        : "m"(idt)
+        : "m"(idtr_val)
     ); 
     return;
 }
